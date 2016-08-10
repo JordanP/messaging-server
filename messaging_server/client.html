@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript">
+
+        var clientId = Math.floor(Math.random() * Math.pow(2, 32));
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('client-id').textContent = 'My client ID : ' + clientId
+        });
+
+
+        window.addEventListener("load", function () {
+
+            // create messaging_server instance
+            var mySocket = new WebSocket("ws://localhost:9000?clientId=" + clientId);
+
+            // add event listener reacting when message is received
+            mySocket.onmessage = function (event) {
+                document.getElementById("msg-rcvd").textContent = event.data;
+            };
+
+
+            var form = document.getElementById("ws-form");
+            var msgToSend = document.getElementById("msg-to-send");
+            form.addEventListener("submit", function (e) {
+                var recipientId = document.getElementById("to-id").value
+                mySocket.send(recipientId + '\x00' + msgToSend.value);
+                e.preventDefault()
+            })
+        });
+    </script>
+    <style>
+        /* Mostly stolen from
+        https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/My_first_HTML_form/Example
+        */
+        form {
+            /* Just to center the form on the page */
+            margin: 0 auto;
+            width: 500px;
+
+            /* To see the limits of the form */
+            padding: 1em;
+            border: 1px solid #CCC;
+            border-radius: 1em;
+        }
+
+        div + div {
+            margin-top: 1em;
+        }
+
+        label {
+            /* To make sure that all label have the same size and are properly align */
+            display: inline-block;
+            width: 130px;
+            text-align: right;
+        }
+
+        input, textarea {
+            /* To make sure that all text field have the same font settings
+               By default, textarea are set with a monospace font */
+            font: 1em sans-serif;
+
+            /* To give the same size to all text field */
+            width: 300px;
+
+            /* To harmonize the look & feel of text field border */
+            border: 1px solid #999;
+        }
+
+        input:focus, textarea:focus {
+            /* To give a little highligh on active elements */
+            border-color: #000;
+        }
+
+        textarea {
+            /* To properly align multiline text field with their label */
+            vertical-align: top;
+
+            /* To give enough room to type some text */
+            height: 5em;
+
+            /* To allow users to resize any textarea vertically
+               It works only on Chrome, Firefox and Safari */
+            resize: vertical;
+        }
+
+        .button {
+            /* To position the buttons to the same position of the text fields */
+            padding-left: 130px; /* same size as the label elements */
+        }
+
+        button {
+            /* This extra margin represent the same space as the space between
+             the labels and their text fields */
+            margin-left: .2em;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Messaging client</h1>
+<h2 id="client-id"></h2>
+<form id="ws-form">
+    <div>
+        <label for="to-id">Send a message to :</label>
+        <input type="number" pattern="\d+" min="0" max="4294967296" id="to-id"
+               required/>
+    </div>
+    <div>
+        <label for="msg-to-send">Message to send :</label>
+        <textarea id="msg-to-send"></textarea>
+    </div>
+    <div class="button">
+        <button type="submit">Send</button>
+    </div>
+    <div>
+        <label for="msg-rcvd">Message received :</label>
+        <textarea id="msg-rcvd" readonly="readonly"></textarea>
+    </div>
+</form>
+</body>
+</html>
